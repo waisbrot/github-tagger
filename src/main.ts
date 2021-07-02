@@ -43,7 +43,7 @@ async function run() {
         await client.git.updateRef({
           owner: github.context.repo.owner,
           repo: github.context.repo.repo,
-          ref: `refs/tags/${tag}`,
+          ref: `tags/${tag}`,
           sha: sha,
           force: true
         });
