@@ -1,24 +1,26 @@
-import * as core from '@actions/core';
-import * as github from '@actions/github';
+import * as core from "@actions/core";
+import * as github from "@actions/github";
 
 async function run() {
   try {
-    const token = core.getInput('repo-token', {required: true});
-    const tag = core.getInput('tag', {required: true});
-    const sha = core.getInput('commit-sha', {required: false}) || github.context.sha;
-    const existsAction = core.getInput('when-tag-exists', {required: false}) || 'fail'
+    const token = core.getInput("repo-token", { required: true });
+    const tag = core.getInput("tag", { required: true });
+    const sha =
+      core.getInput("commit-sha", { required: false }) || github.context.sha;
+    const existsAction =
+      core.getInput("when-tag-exists", { required: false }) || "fail";
 
     const client = new github.GitHub(token);
 
     try {
-      core.debug(`Testing for existing tag ${tag}`);
+      core.warning(`Testing for existing tag ${tag}`);
       await client.git.getRef({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
-        ref: `tags/${tag}`,
+        ref: `tags/${tag}`
       });
     } catch (_error) {
-      core.debug(`No existing tag. Tagging #${sha} with tag ${tag}`);
+      core.warning(`No existing tag. Tagging #${sha} with tag ${tag}`);
       await client.git.createRef({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
@@ -27,27 +29,29 @@ async function run() {
       });
       return;
     }
-    core.debug(`Tag already exists`);
+    core.warning(`Tag already exists`);
     switch (existsAction) {
-      case 'fail':
-        core.error('Tag exists already and existsAction is set to fail');
-        core.setFailed('Tag exists already');
+      case "fail":
+        core.error("Tag exists already and existsAction is set to fail");
+        core.setFailed("Tag exists already");
         return;
-      case 'skip':
-        core.debug(`Skipping: tag already exists`);
+      case "skip":
+        core.warning(`Skipping: tag already exists`);
         return;
-      case 'overwrite':
-        core.debug(`Replacing existing tag with #${sha}`);
+      case "overwrite":
+        core.warning(`Replacing existing tag with #${sha}`);
         await client.git.updateRef({
           owner: github.context.repo.owner,
           repo: github.context.repo.repo,
           ref: `refs/tags/${tag}`,
           sha: sha,
           force: true
-        })
+        });
       default:
-        core.error(`Bad value for parameter existsAction. Got '${existsAction}' but allowed values are {fail, skip, overwrite}`);
-        core.setFailed('Bad value for parameter existsAction');
+        core.error(
+          `Bad value for parameter existsAction. Got '${existsAction}' but allowed values are {fail, skip, overwrite}`
+        );
+        core.setFailed("Bad value for parameter existsAction");
     }
   } catch (error) {
     core.error(error);
