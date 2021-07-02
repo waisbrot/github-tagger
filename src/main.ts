@@ -47,6 +47,7 @@ async function run() {
           sha: sha,
           force: true
         });
+        return;
       default:
         core.error(
           `Bad value for parameter existsAction. Got '${existsAction}' but allowed values are {fail, skip, overwrite}`
