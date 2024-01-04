@@ -10,5 +10,5 @@ inputs:
   commit-sha:
     description: optional commit sha to apply the tag to
 runs:
-  using: 'node12'
+  using: node16
   main: 'lib/main.js'
